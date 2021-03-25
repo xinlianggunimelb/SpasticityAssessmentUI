@@ -70,6 +70,8 @@ public class CenterControl : MonoBehaviour
         EMG = new DelsysEMG();
 
         TestState = TestStates.NotInitialised;
+        
+        //ProgressSlider.value=(float)0.;
 
         //Logging
         Directory.CreateDirectory(csvpath);
@@ -108,9 +110,15 @@ public class CenterControl : MonoBehaviour
 	//TODO: test to remove
 	if(true)
 	{
-		Debug.Log("state:" + M2Robot.State["S"][0]);
-		Debug.Log(TestState);
+		Debug.Log(ProgressSlider.value);
 	}	
+
+	//TODO: test to remove
+//	if(true)
+//	{
+//		Debug.Log("state:" + M2Robot.State["S"][0]);
+//		Debug.Log(TestState);
+//	}	
 	//TODO: test to remove
 //	if(M2Robot.IsInitialised())
 //	{
@@ -124,33 +132,30 @@ public class CenterControl : MonoBehaviour
 //            csvcontent.AppendLine((float)((DateTime.Now.Ticks - t0) / (float)10000000) + "," + DynaLinkHS.StatusRobot.PositionDataJoint1.ToString() + "," + DynaLinkHS.StatusRobot.PositionDataJoint2 + "," + DynaLinkHS.StatusRobot.VelocityDataJoint1 + "," + DynaLinkHS.StatusRobot.VelocityDataJoint2 + "," + DynaLinkHS.StatusSensor.ADCSensor1.CalculateValue + "," + DynaLinkHS.StatusSensor.ADCSensor2.CalculateValue);
 //        }
 
-		if(true){
-			StateCompare[0] = StateCompare[1];
-			StateCompare[1] = M2Robot.State["S"][0];
-		}
+	if(true){
+		StateCompare[0] = StateCompare[1];
+		StateCompare[1] = M2Robot.State["S"][0];
+	}
 		
 		
-	if(StateCompare[1]==6 && (StateCompare[1]-StateCompare[0]!=0)){
-		Debug.Log(1);
+	if((StateCompare[1]==6||(StateCompare[1]>=11&&StateCompare[1]<=19)) && (StateCompare[1]-StateCompare[0]!=0)){
 		StartCoroutine(CountDown());
-		Debug.Log(4);
 	}	
 		
 			
-		IEnumerator CountDown()
-		{ 	
-			CountDownSeconds=3;
-			while(CountDownSeconds>=1){
-				Debug.Log(2);
-				//Start movement at 0
-				SubjectInstructionsText.text = CountDownSeconds.ToString();
-				yield return new WaitForSeconds(1.0f);
-				Debug.Log(3);
-				//Decrease CountdownSeconds
-				CountDownSeconds -= 1;
-				Debug.Log("CountingDown:" +CountDownSeconds);
-			}
+	IEnumerator CountDown()
+	{ 	
+		CountDownSeconds=3;
+		while(CountDownSeconds>=1){
+			//Start movement at 0
+			//SubjectInstructionsText.text = CountDownSeconds.ToString();
+			InstructionsText.text = CountDownSeconds.ToString();
+			yield return new WaitForSeconds(1.0f);
+			//Decrease CountdownSeconds
+			CountDownSeconds -= 1;
 		}
+		InstructionsText.text = " ";
+	}
 	
 
         switch((int)(M2Robot.State["S"][0]))
@@ -181,34 +186,52 @@ public class CenterControl : MonoBehaviour
 			    break;
 			case 9: //click reset/stop button
 				TestState = TestStates.Initialised;
-				SubjectInstructionsText.text = "Reset. Please record again.";	
+				SubjectInstructionsText.text = "Reset done. Please record again.";	
 			    break;
 			case 11: //velocity 1
 			    TestState = TestStates.TrialInProgress;
+			    SubjectInstructionsText.text = "Trial in progress 1/9.";
+			    ProgressSlider.value = ((int)(M2Robot.State["S"][0])-10) / (float)9.0 * (float)100.0;
 			    break;
 			case 12: //velocity 2
 			    TestState = TestStates.TrialInProgress;
+			    SubjectInstructionsText.text = "Trial in progress 2/9.";
+			    ProgressSlider.value = ((int)(M2Robot.State["S"][0])-10) / (float)9.0 * (float)100.0;
 			    break;
 			case 13: //velocity 3
 			    TestState = TestStates.TrialInProgress;
+			    SubjectInstructionsText.text = "Trial in progress 3/9.";
+			    ProgressSlider.value = ((int)(M2Robot.State["S"][0])-10) / (float)9.0 * (float)100.0;
 			    break;
 			case 14: //velocity 4
 			    TestState = TestStates.TrialInProgress;
+			    SubjectInstructionsText.text = "Trial in progress 4/9.";
+			    ProgressSlider.value = ((int)(M2Robot.State["S"][0])-10) / (float)9.0 * (float)100.0;
 			    break;
 			case 15: //velocity 5
 			    TestState = TestStates.TrialInProgress;
+			    SubjectInstructionsText.text = "Trial in progress 5/9.";
+			    ProgressSlider.value = ((int)(M2Robot.State["S"][0])-10) / (float)9.0 * (float)100.0;
 			    break;
 			case 16: //velocity 6
 			    TestState = TestStates.TrialInProgress;
+			    SubjectInstructionsText.text = "Trial in progress 6/9.";
+			    ProgressSlider.value = ((int)(M2Robot.State["S"][0])-10) / (float)9.0 * (float)100.0;
 			    break;
 			case 17: //velocity 7
 			    TestState = TestStates.TrialInProgress;
+			    SubjectInstructionsText.text = "Trial in progress 7/9.";
+			    ProgressSlider.value = ((int)(M2Robot.State["S"][0])-10) / (float)9.0 * (float)100.0;
 			    break;
 			case 18: //velocity 8
 			    TestState = TestStates.TrialInProgress;
+			    SubjectInstructionsText.text = "Trial in progress 8/9.";
+			    ProgressSlider.value = ((int)(M2Robot.State["S"][0])-10) / (float)9.0 * (float)100.0;
 			    break;
 			case 19: //velocity 9
 			    TestState = TestStates.TrialInProgress;
+			    SubjectInstructionsText.text = "Trial in progress 9/9.";
+			    ProgressSlider.value = ((int)(M2Robot.State["S"][0])-10) / (float)9.0 * (float)100.0;
 			    break;
 			case 20:
 			    TestState = TestStates.TrialFinished;
@@ -216,12 +239,10 @@ public class CenterControl : MonoBehaviour
 			    break;			
 			case 21: //max force detected before trial
 			    TestState = TestStates.Initialised; 
-			    //Debug.Log("Force: " + M2Robot.State["F"][0] + M2Robot.State["F"][1]);
 				SubjectInstructionsText.text = "Force Safety Limit Reached! Please record again.";
 			    break;
 			case 22: //max force detected in trial
 			    TestState = TestStates.MaxForceDetcted; 
-			    //Debug.Log("Force: " + M2Robot.State["F"][0] + M2Robot.State["F"][1]);
 				SubjectInstructionsText.text = "Force Safety Limit Reached! Relax and press continue when ready.";
 			    break;
 			case 23:
@@ -244,7 +265,7 @@ public class CenterControl : MonoBehaviour
                 QuitButton.interactable = false;
                 PatientIDInputField.interactable = false; 
                 SessionIDInputField.interactable = false;
-                //ProgressSlider.interactable = false;
+                ProgressSlider.interactable = false;
                 break;
             case TestStates.Initialised:
                 InitButton.interactable = true;
@@ -256,7 +277,7 @@ public class CenterControl : MonoBehaviour
                 QuitButton.interactable = false;
                 PatientIDInputField.interactable = true;
                 SessionIDInputField.interactable = true;
-                //ProgressSlider.interactable = false;
+                ProgressSlider.interactable = false;
                 break;
             case TestStates.MvtRecording:
                 InitButton.interactable = false;
@@ -268,7 +289,7 @@ public class CenterControl : MonoBehaviour
 				QuitButton.interactable = true;
                 PatientIDInputField.interactable = false;
                 SessionIDInputField.interactable = false;
-                //ProgressSlider.interactable = false;
+                ProgressSlider.interactable = false;
                 break; 
             case TestStates.MvtRecorded:
                 InitButton.interactable = false;
@@ -280,7 +301,7 @@ public class CenterControl : MonoBehaviour
                 QuitButton.interactable = true;
                 PatientIDInputField.interactable = true;
                 SessionIDInputField.interactable = true;
-                //ProgressSlider.interactable = false;
+                ProgressSlider.interactable = false;
                 break;
             case TestStates.MvtTesting:
                 InitButton.interactable = false;
@@ -289,10 +310,10 @@ public class CenterControl : MonoBehaviour
                 TestButton.interactable = false;
                 StartButton.interactable = false;
                 ContinueButton.interactable = false;
-                //ProgressSlider.interactable = false;
+                QuitButton.interactable = true;
                 PatientIDInputField.interactable = false;
                 SessionIDInputField.interactable = false;
-                QuitButton.interactable = true;
+                ProgressSlider.interactable = false;
                 break;            
             case TestStates.MvtTested:
                 InitButton.interactable = false;
@@ -301,10 +322,10 @@ public class CenterControl : MonoBehaviour
                 TestButton.interactable = true;
                 StartButton.interactable = true;
                 ContinueButton.interactable = false;
-                //ProgressSlider.interactable = false;
+                QuitButton.interactable = true;
                 PatientIDInputField.interactable = false;
                 SessionIDInputField.interactable = false;
-                QuitButton.interactable = true;
+                ProgressSlider.interactable = false;
                 break;
             case TestStates.TrialInProgress:
                 InitButton.interactable = false;
@@ -316,7 +337,7 @@ public class CenterControl : MonoBehaviour
                 QuitButton.interactable = true;
                 PatientIDInputField.interactable = false;
                 SessionIDInputField.interactable = false;
-                //ProgressSlider.interactable = true;
+                ProgressSlider.interactable = true;
                 break;
             case TestStates.TrialFinished:
                 InitButton.interactable = false;
@@ -328,7 +349,7 @@ public class CenterControl : MonoBehaviour
 				QuitButton.interactable = true;
                 PatientIDInputField.interactable = false;
                 SessionIDInputField.interactable = false;
-                //ProgressSlider.interactable = false;
+                ProgressSlider.interactable = false;
                 break;
             case TestStates.MaxForceDetcted:
                 InitButton.interactable = false;
@@ -340,7 +361,7 @@ public class CenterControl : MonoBehaviour
 				QuitButton.interactable = true;
                 PatientIDInputField.interactable = false;
                 SessionIDInputField.interactable = false;
-                //ProgressSlider.interactable = false;
+                ProgressSlider.interactable = false;
                 break;
             case TestStates.MinJerkFailed:
                 InitButton.interactable = false;
@@ -352,7 +373,7 @@ public class CenterControl : MonoBehaviour
 				QuitButton.interactable = true;
                 PatientIDInputField.interactable = false;
                 SessionIDInputField.interactable = false;
-                //ProgressSlider.interactable = false;
+                ProgressSlider.interactable = false;
                 break;
         }
 
@@ -392,10 +413,11 @@ public class CenterControl : MonoBehaviour
         //TODO: restore if(EMG.IsConnected())
         if (true){
             TestState = TestStates.Initialised;
-            //Debug.Log('1');
+            SubjectInstructionsText.text = "Initialised. Record movement when ready.";	
         }
         else
             TestState = TestStates.NotInitialised;
+            SubjectInstructionsText.text = "Not initialised.";	
     }
 
 
@@ -466,13 +488,12 @@ public class CenterControl : MonoBehaviour
 	    M2Robot.SendCmd("MFRT");
     }
 
- //   IEnumerator InitiateMovement()
-//{
-        //Go for it otherwise
-     //   SubjectInstructionsText.text = "Relax your arm...";
- //       csvcontent.Remove(0, csvcontent.Length);
- //       CurrentCSVFilename = "PatientID_" + PatientIDInputField.text + "_" + TestVelocity.ToString() + "Spd";
-
+//   IEnumerator InitiateMovement()
+//  {
+//        //Go for it otherwise
+//        SubjectInstructionsText.text = "Relax your arm...";
+//        csvcontent.Remove(0, csvcontent.Length);
+//        CurrentCSVFilename = "PatientID_" + PatientIDInputField.text + "_" + TestVelocity.ToString() + "Spd";
 //        if (EMG.IsConnected())
 //        {
 //            if (EMG.IsRunning())
@@ -489,13 +510,7 @@ public class CenterControl : MonoBehaviour
 //            }
 //            EMG.StartRecording(csvpath + "\\" + CurrentCSVFilename + "EMG.csv");
 //        }
-
-//Debug.Log('9');
-  //      CountDown = 4;
-        //Show countdown
-    //    while(CountDown > -1)
-      //      yield return CountDownDisplay();
-  //  }
+//  }
 
 
     void Quit_cb()
