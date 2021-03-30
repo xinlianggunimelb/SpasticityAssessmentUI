@@ -145,8 +145,8 @@ namespace CORC
         /// <summary>
         /// Connect to CORC and register states values to be updated every loop
         /// </summary>
-        //public abstract void Init(string ip = "192.168.7.2", int port = 2048);
-        public abstract void Init(string ip = "127.0.0.1", int port = 2048);
+        public abstract void Init(string ip = "192.168.6.2", int port = 2048);
+        //public abstract void Init(string ip = "127.0.0.1", int port = 2048);
 
         /// <summary>
         /// Disconnect from CORC server

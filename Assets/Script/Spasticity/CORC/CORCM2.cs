@@ -8,8 +8,8 @@ namespace CORC
         /// Specific class to define a CORC M2 robot object and manage communication with CORC server
         /// State dictionnary will contain X: end-effector position, dX: end-effector velocity, F: end-effector interaction force, t: running time of CORC server
         /// </summary>
-        //public override void Init(string ip = "192.168.7.2", int port = 2048)
-        public override void Init(string ip = "127.0.0.1", int port = 2048)
+        public override void Init(string ip = "192.168.6.2", int port = 2048)
+        //public override void Init(string ip = "127.0.0.1", int port = 2048)
         {
             if (Client.IsConnected())
                 Client.Disconnect();

@@ -107,11 +107,6 @@ public class CenterControl : MonoBehaviour
         }
        
 
-	//TODO: test to remove
-	if(true)
-	{
-		Debug.Log(ProgressSlider.value);
-	}	
 
 	//TODO: test to remove
 //	if(true)
@@ -131,6 +126,13 @@ public class CenterControl : MonoBehaviour
 //        {
 //            csvcontent.AppendLine((float)((DateTime.Now.Ticks - t0) / (float)10000000) + "," + DynaLinkHS.StatusRobot.PositionDataJoint1.ToString() + "," + DynaLinkHS.StatusRobot.PositionDataJoint2 + "," + DynaLinkHS.StatusRobot.VelocityDataJoint1 + "," + DynaLinkHS.StatusRobot.VelocityDataJoint2 + "," + DynaLinkHS.StatusSensor.ADCSensor1.CalculateValue + "," + DynaLinkHS.StatusSensor.ADCSensor2.CalculateValue);
 //        }
+
+	//Save data
+    if (M2Robot.State["S"][0]>=11 && M2Robot.State["S"][0]<=19)
+    {
+		csvcontent.AppendLine((float)((DateTime.Now.Ticks - t0) / (float)10000000) + "," + M2Robot.State["X"][0].ToString() + "," + M2Robot.State["X"][1] + "," + M2Robot.State["dX"][0] + "," + M2Robot.State["dX"][1] + "," + M2Robot.State["F"][0] + "," + M2Robot.State["F"][1] + "," + M2Robot.State["S"][0]);
+    }
+
 
 	if(true){
 		StateCompare[0] = StateCompare[1];
@@ -389,6 +391,7 @@ public class CenterControl : MonoBehaviour
     }
 
 
+
     /// <summary>
     /// Write the content of the csvcontent to a file in the appropriate folder
     /// AND erase the content of the csv content (to start a new one).
@@ -398,7 +401,7 @@ public class CenterControl : MonoBehaviour
     {
         CurrentCSVFilename = "PatientID_" + PatientIDInputField.text + "_" + TestName;
         string csvfullfilename = csvpath + "\\" + CurrentCSVFilename + ".csv";
-        File.WriteAllText(csvfullfilename, "Time, Xpos, Ypos, Xspd, Ysped, Xfor, Yfor\n");
+        File.WriteAllText(csvfullfilename, "Time, Xpos, Ypos, Xspd, Ysped, Xfor, Yfor, State\n");
         File.AppendAllText(csvfullfilename, csvcontent.ToString());
         csvcontent.Remove(0, csvcontent.Length);
     }
@@ -415,9 +418,10 @@ public class CenterControl : MonoBehaviour
             TestState = TestStates.Initialised;
             SubjectInstructionsText.text = "Initialised. Record movement when ready.";	
         }
-        else
+        else {
             TestState = TestStates.NotInitialised;
-            SubjectInstructionsText.text = "Not initialised.";	
+            SubjectInstructionsText.text = "Not initialised.";
+		}	
     }
 
 
@@ -429,7 +433,7 @@ public class CenterControl : MonoBehaviour
         //Setup connection to robot
         if (!M2Robot.IsInitialised())
         {
-            M2Robot.Init("127.0.0.1");
+            M2Robot.Init("192.168.6.2");
             if(!M2Robot.IsInitialised())
 				return;
 			M2Robot.SetLoggingFile("mylogfile.csv");
