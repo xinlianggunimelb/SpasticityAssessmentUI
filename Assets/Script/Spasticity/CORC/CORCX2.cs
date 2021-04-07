@@ -8,12 +8,12 @@ namespace CORC
     /// </summary>
     public class CORCX2 : CORCRobot
     {
-        public override void Init(string ip = "192.168.7.2", int port = 2048)
+        public override void Init(long t0, string ip = "192.168.7.2", int port = 2048)
         {
             if (Client.IsConnected())
                 Client.Disconnect();
 
-            if (Client.Connect(ip, port))
+            if (Client.Connect(t0, ip, port))
             {
                 //Define state values to receive (in pre-defined order: should match CORC implementation)
                 State = new FixedDictionary

@@ -32,6 +32,8 @@ namespace CORC
         private int Port;
         private TcpClient client;
         private Thread receptionThread = null;
+        
+        private long t0_in_ticks;
 
         private double[] ReceivedValues;
         private char[] ReceivedCmd = new char[CMD_SIZE];
@@ -64,10 +66,12 @@ namespace CORC
         /// <summary>
         /// Attempt to connect to the server indicated by ip and port and create a reception thread
         /// </summary>
-        public bool Connect(string ip, int port = 2048)
+        public bool Connect(long t0, string ip, int port = 2048)
         {
             IP = IPAddress.Parse(ip);
             Port = port;
+            t0_in_ticks = t0;
+            
             try
             {
                 client.Connect(ip, Port);
@@ -99,8 +103,19 @@ namespace CORC
         public void Disconnect()
         {
             Connected = false;
+			try
+			{
+				LogFileStream.Close();
+			}
+			catch
+			{
+				//ok
+			}
+			
             if (receptionThread != null)
+            {
                 receptionThread.Abort();
+            }
         }
 
         public bool IsConnected()
@@ -306,7 +321,7 @@ namespace CORC
                                         //Write to file
 										for (int i = 0; i < nbValuesToReceive; i++)
 											LogFileStream.Write(ReceivedValues[i] + ",");
-											
+										LogFileStream.Write((float)((DateTime.Now.Ticks - t0_in_ticks)/(float)10000000) + ",");
 										LogFileStream.Write("\n");
                                     }
 

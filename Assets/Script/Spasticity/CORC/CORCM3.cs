@@ -8,12 +8,12 @@ namespace CORC
         /// Specific class to define a CORC X2 robot object and manage communication with CORC server
         /// State dictionnary will contain X: end-effector position, dq: end-effector velocity, F: end-effector interaction force, t: running time of CORC server
         /// </summary>
-        public override void Init(string ip = "192.168.7.2", int port = 2048)
+        public override void Init(long t0, string ip = "192.168.7.2", int port = 2048)
         {
             if (Client.IsConnected())
                 Client.Disconnect();
 
-            if (Client.Connect(ip, port))
+            if (Client.Connect(t0, ip, port))
             {
                 //Define state values to receive (in pre-defined order: should match CORC implementation)
                 State = new FixedDictionary

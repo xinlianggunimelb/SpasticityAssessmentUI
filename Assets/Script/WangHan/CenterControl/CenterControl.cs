@@ -31,7 +31,7 @@ public enum TestStates
 public class CenterControl : MonoBehaviour
 {
     //UI elements
-    public Button InitButton, RecordButton, TestButton, StartButton, ContinueButton, QuitButton;
+    public Button InitButton, RecordButton, TestButton, StartButton, ContinueButton, StopButton, QuitButton;
     public Toggle EMGToggle;
     public InputField PatientIDInputField, SessionIDInputField;
     public Slider ProgressSlider;
@@ -42,18 +42,18 @@ public class CenterControl : MonoBehaviour
 
 
     //Timing
-    public long t0;
+    public long T0, t0;
     public Timer timerBack, timerRecordBack, timerCountDown, timerRecordMvt, timerStart;
     public int CountDownSeconds;
 
     //Logging
     public StringBuilder csvcontent;
-    public String CurrentCSVFilename = "";
+    public String CurrentCSVFilenameCORC = "", CurrentCSVFilenameEMG = "";
     string csvpath = System.Environment.GetFolderPath(System.Environment.SpecialFolder.MyDocuments) + "//SpasticityStudyData//" + DateTime.Now.ToString("yyyy-MM-dd_HH_mm_ss");
 
     //Test logic and parameters
-    public TestStates TestState;
-	public double[] StateCompare = new double[2];
+    private TestStates TestState;
+	private double[] StateCompare = new double[2];
 	
     private string communicationConfig;
 
@@ -71,7 +71,6 @@ public class CenterControl : MonoBehaviour
 
         TestState = TestStates.NotInitialised;
         
-        //ProgressSlider.value=(float)0.;
 
         //Logging
         Directory.CreateDirectory(csvpath);
@@ -82,6 +81,7 @@ public class CenterControl : MonoBehaviour
         TestButton.onClick.AddListener(Test_cb);
         StartButton.onClick.AddListener(Start_cb);
         ContinueButton.onClick.AddListener(Continue_cb);
+        StopButton.onClick.AddListener(Stop_cb);
         QuitButton.onClick.AddListener(Quit_cb);
         
         //RecordButton.onClick.AddListener(delegate { StartCoroutine(RecordMvt_cb()); } );
@@ -92,55 +92,33 @@ public class CenterControl : MonoBehaviour
 
     private void Update()
     {
-        if (EMG.IsConnected())
+		
+	if (EMG.IsConnected())
+	{
+		if (EMG.IsRunning())
         {
-            EMG.Update();
-            //EMGStateTxt.text = EMG.GetNbSensors() + "EMGs connected.";
-            EMGToggle.GetComponentInChildren<Text>().text = EMG.GetNbSensors() + "EMGs connected.";
+            //EMGStateTxt.text = "EMG recording";
+            EMGToggle.GetComponentInChildren<Text>().text = "EMG recording";
             EMGToggle.GetComponentInChildren<Text>().color = new Color(0.1f, 1.0f, 0.1f);
         }
         else
         {
-            //EMGStateTxt.text = "EMGs NOT connected.";
-            EMGToggle.GetComponentInChildren<Text>().text = "EMGs NOT connected.";
+            //EMGStateTxt.text = "EMG ERROR !";
+            EMGToggle.GetComponentInChildren<Text>().text = "EMG error";
             EMGToggle.GetComponentInChildren<Text>().color = new Color(1.0f, 0.1f, 0.1f);
         }
-       
+    }   
 
 
-	//TODO: test to remove
-//	if(true)
-//	{
-//		Debug.Log("state:" + M2Robot.State["S"][0]);
-//		Debug.Log(TestState);
-//	}	
-	//TODO: test to remove
-//	if(M2Robot.IsInitialised())
-//	{
-//		Debug.Log(M2Robot.State["X"][0]);
-//	}
-	
-
-        //Save data
-//        if (TestRunning)
-//        {
-//            csvcontent.AppendLine((float)((DateTime.Now.Ticks - t0) / (float)10000000) + "," + DynaLinkHS.StatusRobot.PositionDataJoint1.ToString() + "," + DynaLinkHS.StatusRobot.PositionDataJoint2 + "," + DynaLinkHS.StatusRobot.VelocityDataJoint1 + "," + DynaLinkHS.StatusRobot.VelocityDataJoint2 + "," + DynaLinkHS.StatusSensor.ADCSensor1.CalculateValue + "," + DynaLinkHS.StatusSensor.ADCSensor2.CalculateValue);
-//        }
-
-	//Save data
-    if (M2Robot.State["S"][0]>=11 && M2Robot.State["S"][0]<=19)
-    {
-		csvcontent.AppendLine((float)((DateTime.Now.Ticks - t0) / (float)10000000) + "," + M2Robot.State["X"][0].ToString() + "," + M2Robot.State["X"][1] + "," + M2Robot.State["dX"][0] + "," + M2Robot.State["dX"][1] + "," + M2Robot.State["F"][0] + "," + M2Robot.State["F"][1] + "," + M2Robot.State["S"][0]);
-    }
-
-
-	if(true){
+	if(M2Robot.IsInitialised())
+	{
 		StateCompare[0] = StateCompare[1];
 		StateCompare[1] = M2Robot.State["S"][0];
 	}
 		
 		
-	if((StateCompare[1]==6||(StateCompare[1]>=11&&StateCompare[1]<=19)) && (StateCompare[1]-StateCompare[0]!=0)){
+	if((StateCompare[1]==6||(StateCompare[1]>=11&&StateCompare[1]<=19)) && (StateCompare[1]-StateCompare[0]!=0))
+	{
 		StartCoroutine(CountDown());
 	}	
 		
@@ -150,7 +128,6 @@ public class CenterControl : MonoBehaviour
 		CountDownSeconds=3;
 		while(CountDownSeconds>=1){
 			//Start movement at 0
-			//SubjectInstructionsText.text = CountDownSeconds.ToString();
 			InstructionsText.text = CountDownSeconds.ToString();
 			yield return new WaitForSeconds(1.0f);
 			//Decrease CountdownSeconds
@@ -160,6 +137,7 @@ public class CenterControl : MonoBehaviour
 	}
 	
 
+	if(M2Robot.IsInitialised()){
         switch((int)(M2Robot.State["S"][0]))
         {
 			//case 0: CORC not calibrated
@@ -252,6 +230,7 @@ public class CenterControl : MonoBehaviour
 				SubjectInstructionsText.text = "Robot not back to starting point... Retry.";
 				break;
 			}
+		}
 
 
         //Update UI based on state
@@ -264,9 +243,10 @@ public class CenterControl : MonoBehaviour
                 TestButton.interactable = false;
                 StartButton.interactable = false;
                 ContinueButton.interactable = false;   
+                StopButton.interactable = false;
                 QuitButton.interactable = false;
-                PatientIDInputField.interactable = false; 
-                SessionIDInputField.interactable = false;
+                PatientIDInputField.interactable = true; 
+                SessionIDInputField.interactable = true;
                 ProgressSlider.interactable = false;
                 break;
             case TestStates.Initialised:
@@ -276,9 +256,10 @@ public class CenterControl : MonoBehaviour
                 TestButton.interactable = false;
                 StartButton.interactable = false;
                 ContinueButton.interactable = false;
-                QuitButton.interactable = false;
-                PatientIDInputField.interactable = true;
-                SessionIDInputField.interactable = true;
+                StopButton.interactable = false;
+                QuitButton.interactable = true;
+                PatientIDInputField.interactable = false;
+                SessionIDInputField.interactable = false;
                 ProgressSlider.interactable = false;
                 break;
             case TestStates.MvtRecording:
@@ -288,7 +269,8 @@ public class CenterControl : MonoBehaviour
                 TestButton.interactable = false;
                 StartButton.interactable = false;
                 ContinueButton.interactable = false;
-				QuitButton.interactable = true;
+				StopButton.interactable = true;
+				QuitButton.interactable = false;
                 PatientIDInputField.interactable = false;
                 SessionIDInputField.interactable = false;
                 ProgressSlider.interactable = false;
@@ -300,9 +282,10 @@ public class CenterControl : MonoBehaviour
                 TestButton.interactable = true;
                 StartButton.interactable = false;
                 ContinueButton.interactable = false;
-                QuitButton.interactable = true;
-                PatientIDInputField.interactable = true;
-                SessionIDInputField.interactable = true;
+                StopButton.interactable = true;
+                QuitButton.interactable = false;
+                PatientIDInputField.interactable = false;
+                SessionIDInputField.interactable = false;
                 ProgressSlider.interactable = false;
                 break;
             case TestStates.MvtTesting:
@@ -312,7 +295,8 @@ public class CenterControl : MonoBehaviour
                 TestButton.interactable = false;
                 StartButton.interactable = false;
                 ContinueButton.interactable = false;
-                QuitButton.interactable = true;
+                StopButton.interactable = true;
+                QuitButton.interactable = false;
                 PatientIDInputField.interactable = false;
                 SessionIDInputField.interactable = false;
                 ProgressSlider.interactable = false;
@@ -324,7 +308,8 @@ public class CenterControl : MonoBehaviour
                 TestButton.interactable = true;
                 StartButton.interactable = true;
                 ContinueButton.interactable = false;
-                QuitButton.interactable = true;
+                StopButton.interactable = true;
+                QuitButton.interactable = false;
                 PatientIDInputField.interactable = false;
                 SessionIDInputField.interactable = false;
                 ProgressSlider.interactable = false;
@@ -336,7 +321,8 @@ public class CenterControl : MonoBehaviour
                 TestButton.interactable = false;
                 StartButton.interactable = false;
                 ContinueButton.interactable = false;
-                QuitButton.interactable = true;
+                StopButton.interactable = true;
+                QuitButton.interactable = false;
                 PatientIDInputField.interactable = false;
                 SessionIDInputField.interactable = false;
                 ProgressSlider.interactable = true;
@@ -348,6 +334,7 @@ public class CenterControl : MonoBehaviour
                 TestButton.interactable = false;
                 StartButton.interactable = false;
                 ContinueButton.interactable = false;
+				StopButton.interactable = true;
 				QuitButton.interactable = true;
                 PatientIDInputField.interactable = false;
                 SessionIDInputField.interactable = false;
@@ -360,6 +347,7 @@ public class CenterControl : MonoBehaviour
                 TestButton.interactable = false;
                 StartButton.interactable = false;
                 ContinueButton.interactable = true;
+				StopButton.interactable = true;
 				QuitButton.interactable = true;
                 PatientIDInputField.interactable = false;
                 SessionIDInputField.interactable = false;
@@ -372,6 +360,7 @@ public class CenterControl : MonoBehaviour
                 TestButton.interactable = false;
                 StartButton.interactable = false;
                 ContinueButton.interactable = true;
+				StopButton.interactable = true;
 				QuitButton.interactable = true;
                 PatientIDInputField.interactable = false;
                 SessionIDInputField.interactable = false;
@@ -391,30 +380,30 @@ public class CenterControl : MonoBehaviour
     }
 
 
-
     /// <summary>
     /// Write the content of the csvcontent to a file in the appropriate folder
     /// AND erase the content of the csv content (to start a new one).
     /// </summary>
     /// <param name="TestName"></param>
-    void WriteToFile(string TestName)
-    {
-        CurrentCSVFilename = "PatientID_" + PatientIDInputField.text + "_" + TestName;
-        string csvfullfilename = csvpath + "\\" + CurrentCSVFilename + ".csv";
-        File.WriteAllText(csvfullfilename, "Time, Xpos, Ypos, Xspd, Ysped, Xfor, Yfor, State\n");
-        File.AppendAllText(csvfullfilename, csvcontent.ToString());
-        csvcontent.Remove(0, csvcontent.Length);
-    }
+//    void WriteToFile(string TestName)
+//    {
+//        CurrentCSVFilename = "PatientID_" + PatientIDInputField.text + "_" + TestName;
+//        string csvfullfilename = csvpath + "\\" + CurrentCSVFilename + ".csv";
+//        File.WriteAllText(csvfullfilename, "Time, Xpos, Ypos, Xspd, Ysped, Xfor, Yfor, State\n");
+//        File.AppendAllText(csvfullfilename, csvcontent.ToString());
+//        csvcontent.Remove(0, csvcontent.Length);
+//    }
 
 
 
     void Init_cb()
     {
-        InitRobot_cb();
-        InitDelsys();
+        T0 = DateTime.Now.Ticks;
+        InitRobot_cb(T0);
+        InitDelsys(T0);
         //Reset state
         //TODO: restore if(EMG.IsConnected())
-        if (true){
+        if (M2Robot.IsInitialised() && EMG.IsConnected()){
             TestState = TestStates.Initialised;
             SubjectInstructionsText.text = "Initialised. Record movement when ready.";	
         }
@@ -428,25 +417,31 @@ public class CenterControl : MonoBehaviour
     /// <summary>
     /// Homing and sensors init
     /// </summary>
-    void InitRobot_cb()
+    void InitRobot_cb(long t0)
     {
         //Setup connection to robot
         if (!M2Robot.IsInitialised())
         {
-            M2Robot.Init("192.168.6.2");
+            long init_time = t0;
+            //M2Robot.Init("127.0.0.1"); //locally
+            //M2Robot.Init("192.168.6.2"); //Linux
+            M2Robot.Init(init_time, "192.168.7.2", 2048); //Windows
+            //M2Robot.Init(start_time); //Windows
             if(!M2Robot.IsInitialised())
 				return;
-			M2Robot.SetLoggingFile("mylogfile.csv");
+			CurrentCSVFilenameCORC = "PatientID_" + PatientIDInputField.text + "_SessionID_" + SessionIDInputField.text;
+			string csvfullfilenameCORC = csvpath + "\\" + CurrentCSVFilenameCORC + "_CORC.csv";
+			M2Robot.SetLoggingFile(csvfullfilenameCORC);
 			M2Robot.SetLogging(true); //start or stop logging to file
-            Debug.Log("Connected");
+            Debug.Log("CORC Connected");
         }
     }
 
 
-    void InitDelsys()
+    void InitDelsys(long t0)
     {
-        t0 = DateTime.Now.Ticks;
-        EMG.Init(t0);
+        long init_time = t0;
+        EMG.Init(init_time);
         EMG.Connect();
         if (EMG.IsConnected())
         {
@@ -463,9 +458,13 @@ public class CenterControl : MonoBehaviour
             EMGToggle.GetComponentInChildren<Text>().text = "EMGs NOT connected.";
             EMGToggle.GetComponentInChildren<Text>().color = new Color(1.0f, 0.1f, 0.1f);
         }
+        CurrentCSVFilenameEMG = "PatientID_" + PatientIDInputField.text + "_SessionID_" + SessionIDInputField.text;
+		string csvfullfilenameEMG = csvpath + "\\" + CurrentCSVFilenameEMG + "_EMG.csv";
+        EMG.StartRecording(csvfullfilenameEMG);
     }
 
 
+		
     //IEnumerator RecordMvt_cb()
     void RecordMvt_cb()
     {
@@ -492,43 +491,25 @@ public class CenterControl : MonoBehaviour
 	    M2Robot.SendCmd("MFRT");
     }
 
-//   IEnumerator InitiateMovement()
-//  {
-//        //Go for it otherwise
-//        SubjectInstructionsText.text = "Relax your arm...";
-//        csvcontent.Remove(0, csvcontent.Length);
-//        CurrentCSVFilename = "PatientID_" + PatientIDInputField.text + "_" + TestVelocity.ToString() + "Spd";
-//        if (EMG.IsConnected())
-//        {
-//            if (EMG.IsRunning())
-//            {
-//                //EMGStateTxt.text = "EMG recording";
-//                EMGToggle.GetComponentInChildren<Text>().text = "EMG recording";
-//                EMGToggle.GetComponentInChildren<Text>().color = new Color(0.1f, 1.0f, 0.1f);
-//            }
-//            else
-//            {
-//                EMGToggle.GetComponentInChildren<Text>().text = "EMG error";
-//                EMGToggle.GetComponentInChildren<Text>().color = new Color(1.0f, 0.1f, 0.1f);
-//                //EMGStateTxt.text = "EMG ERROR !";
-//            }
-//            EMG.StartRecording(csvpath + "\\" + CurrentCSVFilename + "EMG.csv");
-//        }
-//  }
+
+    void Stop_cb()
+    {
+		  M2Robot.SendCmd("REST");
+    }
 
 
     void Quit_cb()
     {
-//        Debug.Log("Exit");
-//        //Stop EMG Aquisition
-//        if (EMG.IsConnected())
-//        {
-//            EMG.StopAcquisition();
-//            EMG.Close();
-//        }
-//        //Stop robot
-		  M2Robot.SendCmd("REST");
-//        //Exit
+        //Stop EMG Aquisition
+        if (EMG.IsConnected())
+        {
+            EMG.StopAcquisition();
+            EMG.StopRecording();
+            EMG.Close();
+        }
+        //Stop robot
+        M2Robot.Disconnect();
+        //Exit
     }
 
 
