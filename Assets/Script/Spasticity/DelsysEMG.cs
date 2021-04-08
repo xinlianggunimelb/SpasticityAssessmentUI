@@ -307,7 +307,7 @@ public class DelsysEMG {
     public void StartRecording(String filename)
     {
         Filename = filename;
-        Debug.Log(Filename);
+        //Debug.Log(Filename);
         Recording = true;
         //Clear lists imuEmgDataList[sn] emgDataList[sn] x16
         for (int i = 0; i < 16; i++)

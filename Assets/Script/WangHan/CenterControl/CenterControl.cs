@@ -407,6 +407,10 @@ public class CenterControl : MonoBehaviour
             TestState = TestStates.Initialised;
             SubjectInstructionsText.text = "Initialised. Record movement when ready.";	
         }
+        else if (M2Robot.IsInitialised() && !EMG.IsConnected()){
+            TestState = TestStates.Initialised;
+            SubjectInstructionsText.text = "CORC Initialised. Record movement when ready.";	
+        }
         else {
             TestState = TestStates.NotInitialised;
             SubjectInstructionsText.text = "Not initialised.";
@@ -450,6 +454,9 @@ public class CenterControl : MonoBehaviour
             //EMGStateTxt.text = EMG.GetNbSensors() + "EMGs connected.";
             EMGToggle.GetComponentInChildren<Text>().text = EMG.GetNbSensors() + "EMGs connected.";
             EMGToggle.GetComponentInChildren<Text>().color = new Color(0.1f, 1.0f, 0.1f);
+            CurrentCSVFilenameEMG = "PatientID_" + PatientIDInputField.text + "_SessionID_" + SessionIDInputField.text;
+			string csvfullfilenameEMG = csvpath + "\\" + CurrentCSVFilenameEMG + "_EMG.csv";
+			EMG.StartRecording(csvfullfilenameEMG);
         }
         else
         {
@@ -458,9 +465,6 @@ public class CenterControl : MonoBehaviour
             EMGToggle.GetComponentInChildren<Text>().text = "EMGs NOT connected.";
             EMGToggle.GetComponentInChildren<Text>().color = new Color(1.0f, 0.1f, 0.1f);
         }
-        CurrentCSVFilenameEMG = "PatientID_" + PatientIDInputField.text + "_SessionID_" + SessionIDInputField.text;
-		string csvfullfilenameEMG = csvpath + "\\" + CurrentCSVFilenameEMG + "_EMG.csv";
-        EMG.StartRecording(csvfullfilenameEMG);
     }
 
 

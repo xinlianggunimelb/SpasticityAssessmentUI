@@ -106,10 +106,13 @@ namespace CORC
             LoggingFilename = filename;
             //Create file and write header
             Client.LogFileStream = new StreamWriter(LoggingFilename);
-			foreach (string key in State.ItemsOrder)
-			{
-				Client.LogFileStream.Write(key + ",");
-			}
+            string[] title={ "Tc", "X0", "X1", "dX0", "dX1", "F0", "F1", "S", "V", "R", "Tu" };
+            for(int col=0; col<11; col++)
+            {Client.LogFileStream.Write(title[col] + "," );}
+//			foreach (string key in State.ItemsOrder)
+//			{
+//				Client.LogFileStream.Write(key + ",");
+//			}
 			Client.LogFileStream.Write("\n");
 			return true;
         }
