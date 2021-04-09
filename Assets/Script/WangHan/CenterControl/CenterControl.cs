@@ -21,10 +21,10 @@ public enum TestStates
     MvtTesting,
     MvtTested, //Movement has been tested and validated
     TrialInProgress, //Ongoing spasticity testing
-    CountingDown,
     TrialFinished,
     MaxForceDetcted,
-    MinJerkFailed
+    MinJerkFailed,
+    Quited
 }
 
 
@@ -121,20 +121,6 @@ public class CenterControl : MonoBehaviour
 	{
 		StartCoroutine(CountDown());
 	}	
-		
-			
-	IEnumerator CountDown()
-	{ 	
-		CountDownSeconds=3;
-		while(CountDownSeconds>=1){
-			//Start movement at 0
-			InstructionsText.text = CountDownSeconds.ToString();
-			yield return new WaitForSeconds(1.0f);
-			//Decrease CountdownSeconds
-			CountDownSeconds -= 1;
-		}
-		InstructionsText.text = " ";
-	}
 	
 
 	if(M2Robot.IsInitialised()){
@@ -366,6 +352,19 @@ public class CenterControl : MonoBehaviour
                 SessionIDInputField.interactable = false;
                 ProgressSlider.interactable = false;
                 break;
+            case TestStates.Quited:
+                InitButton.interactable = false;
+                EMGToggle.interactable = false;
+                RecordButton.interactable = false;
+                TestButton.interactable = false;
+                StartButton.interactable = false;
+                ContinueButton.interactable = false;
+				StopButton.interactable = false;
+				QuitButton.interactable = false;
+                PatientIDInputField.interactable = false;
+                SessionIDInputField.interactable = false;
+                ProgressSlider.interactable = false;
+                break;
         }
 
     }
@@ -395,6 +394,27 @@ public class CenterControl : MonoBehaviour
 //    }
 
 
+	IEnumerator WaitM2Init()
+	{ 	
+		//Debug.Log("waiting start");
+		yield return new WaitForSeconds(5.0f);
+		//Debug.Log("waiting done");
+	}
+	
+	
+	IEnumerator CountDown()
+	{ 	
+		CountDownSeconds=3;
+		while(CountDownSeconds>=1){
+			//Start movement at 0
+			InstructionsText.text = CountDownSeconds.ToString();
+			yield return new WaitForSeconds(1.0f);
+			//Decrease CountdownSeconds
+			CountDownSeconds -= 1;
+		}
+		InstructionsText.text = " ";
+	}
+
 
     void Init_cb()
     {
@@ -404,10 +424,12 @@ public class CenterControl : MonoBehaviour
         //Reset state
         //TODO: restore if(EMG.IsConnected())
         if (M2Robot.IsInitialised() && EMG.IsConnected()){
+            //StartCoroutine(WaitM2Init());
             TestState = TestStates.Initialised;
             SubjectInstructionsText.text = "Initialised. Record movement when ready.";	
         }
         else if (M2Robot.IsInitialised() && !EMG.IsConnected()){
+            //StartCoroutine(WaitM2Init());
             TestState = TestStates.Initialised;
             SubjectInstructionsText.text = "CORC Initialised. Record movement when ready.";	
         }
@@ -498,12 +520,14 @@ public class CenterControl : MonoBehaviour
 
     void Stop_cb()
     {
-		  M2Robot.SendCmd("REST");
+		M2Robot.SendCmd("REST");
     }
 
 
     void Quit_cb()
     {
+        //Disconnect robot
+        M2Robot.Disconnect();
         //Stop EMG Aquisition
         if (EMG.IsConnected())
         {
@@ -511,9 +535,9 @@ public class CenterControl : MonoBehaviour
             EMG.StopRecording();
             EMG.Close();
         }
-        //Stop robot
-        M2Robot.Disconnect();
         //Exit
+        TestState = TestStates.Quited;
+        SubjectInstructionsText.text = "Quited.";
     }
 
 
