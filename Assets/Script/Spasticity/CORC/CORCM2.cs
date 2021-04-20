@@ -30,9 +30,11 @@ namespace CORC
                     ["F"] = new double[2],
                     ["S"] = new double[1],
                     ["V"] = new double[1],
-                    ["R"] = new double[1]
+                    ["R"] = new double[1],
+                    ["Ct"] = new double[2],
+                    ["IA"] = new double[1]
                 };
-                State.Init(new string[] { "t", "X", "dX", "F", "S", "V", "R" });
+                State.Init(new string[] { "t", "X", "dX", "F", "S", "V", "R", "Ct", "IA" });
                 Initialised = true;
             }
             else
