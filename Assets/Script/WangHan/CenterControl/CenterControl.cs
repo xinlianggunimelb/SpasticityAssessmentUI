@@ -24,6 +24,7 @@ public enum TestStates
     TrialFinished,
     MaxForceDetcted,
     MinJerkFailed,
+    RobotDisabled,
     Quited
 }
 
@@ -152,7 +153,7 @@ public class CenterControl : MonoBehaviour
 			    break;
 			case 9: //click reset/stop button
 				TestState = TestStates.Initialised;
-				SubjectInstructionsText.text = "Reset done. Please record again.";	
+				SubjectInstructionsText.text = "Reset done.";	
 			    break;
 			case 11: //velocity 1
 			    TestState = TestStates.TrialInProgress;
@@ -203,17 +204,21 @@ public class CenterControl : MonoBehaviour
 			    TestState = TestStates.TrialFinished;
 			    SubjectInstructionsText.text = "Trial finished! Thank you.";
 			    break;			
-			case 21: //max force detected before trial
+			case 21: //max force/speed detected before trial
 			    TestState = TestStates.Initialised; 
-				SubjectInstructionsText.text = "Force Safety Limit Reached! Please record again.";
+				SubjectInstructionsText.text = "Safety Limit Reached! Please record again.";
 			    break;
-			case 22: //max force detected in trial
+			case 22: //max force/speed detected in trial
 			    TestState = TestStates.MaxForceDetcted; 
-				SubjectInstructionsText.text = "Force Safety Limit Reached! Relax and press continue when ready.";
+				SubjectInstructionsText.text = "Safety Limit Reached! Relax and press continue when ready.";
 			    break;
 			case 23:
 				TestState = TestStates.MinJerkFailed;
 				SubjectInstructionsText.text = "Robot not back to starting point... Retry.";
+				break;
+			case 24:
+				TestState = TestStates.RobotDisabled;
+				SubjectInstructionsText.text = "Safety Limit Reached! Relax and press reset when ready.";
 				break;
 			}
 		}
@@ -346,6 +351,19 @@ public class CenterControl : MonoBehaviour
                 TestButton.interactable = false;
                 StartButton.interactable = false;
                 ContinueButton.interactable = true;
+				StopButton.interactable = true;
+				QuitButton.interactable = true;
+                PatientIDInputField.interactable = false;
+                SessionIDInputField.interactable = false;
+                ProgressSlider.interactable = false;
+                break;
+			case TestStates.RobotDisabled:
+                InitButton.interactable = false;
+                EMGToggle.interactable = false;
+                RecordButton.interactable = false;
+                TestButton.interactable = false;
+                StartButton.interactable = false;
+                ContinueButton.interactable = false;
 				StopButton.interactable = true;
 				QuitButton.interactable = true;
                 PatientIDInputField.interactable = false;
