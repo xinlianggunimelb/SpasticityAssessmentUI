@@ -20,6 +20,7 @@ public enum TestStates
     MvtRecorded, //Movement has been recorded and validated
     MvtTesting,
     MvtTested, //Movement has been tested and validated
+    BtwTrialCheck,
     TrialInProgress, //Ongoing spasticity testing
     TrialFinished,
     MaxForceDetcted,
@@ -154,6 +155,10 @@ public class CenterControl : MonoBehaviour
 			case 9: //click reset/stop button
 				TestState = TestStates.Initialised;
 				SubjectInstructionsText.text = "Reset done.";	
+			    break;
+			case 10:
+			    TestState = TestStates.BtwTrialCheck;
+			    SubjectInstructionsText.text = "Start next velocity when ready.";	
 			    break;
 			case 11: //velocity 1
 			    TestState = TestStates.TrialInProgress;
@@ -304,6 +309,19 @@ public class CenterControl : MonoBehaviour
                 PatientIDInputField.interactable = false;
                 SessionIDInputField.interactable = false;
                 ProgressSlider.interactable = false;
+                break;
+            case TestStates.BtwTrialCheck:
+                InitButton.interactable = false;
+                EMGToggle.interactable = false;
+                RecordButton.interactable = false;
+                TestButton.interactable = false;
+                StartButton.interactable = true;
+                ContinueButton.interactable = false;
+                StopButton.interactable = true;
+                QuitButton.interactable = false;
+                PatientIDInputField.interactable = false;
+                SessionIDInputField.interactable = false;
+                ProgressSlider.interactable = true;
                 break;
             case TestStates.TrialInProgress:
                 InitButton.interactable = false;
