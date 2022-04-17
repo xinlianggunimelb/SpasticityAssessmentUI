@@ -336,7 +336,7 @@ public class DelsysEMG {
             for (int i = 0; i < 16; i++) //emgDataList will contain the most samples
             {
                 //Write sensors values
-                if (_sensors[i] == SensorTypes.SensorTrignoImu)
+                if (_sensors[i] == SensorTypes.SensorTrignoImu || _sensors[i] == SensorTypes.SensorTrigno)
                 {
                     csvIMSensors.Append(imuEmgDataList[i][imEmgIndex] + ",");
                 }
